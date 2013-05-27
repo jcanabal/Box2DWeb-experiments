@@ -26,7 +26,7 @@ html,body{ margin:0; padding:0; width: 100%;}
 		}
 		
 		.clear-button:active{ background-color: #111111;}
-	/*.control-container{
+	.control-container{
 		padding-top: 14px;
 		width: 100%;
 		overflow: hidden;
@@ -53,4 +53,4 @@ html,body{ margin:0; padding:0; width: 100%;}
 		width: 15px;
 		height: 15px;
 		border-radius: 50%;
-	}*/
+	}

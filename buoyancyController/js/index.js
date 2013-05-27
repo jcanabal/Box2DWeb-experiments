@@ -22,7 +22,7 @@ var timeStep = 1/60;
 var velocityIterations = 8;
 var positionIterations = 3;
 
-var balls = [];
+var bodies = [];
 var waterSensor;
 var buoyancyController;
 
@@ -40,16 +40,18 @@ function init(){
 	
 	// set up the input range listeners
 	
-	/*document.getElementById('density-input').onchange = function(){fixtureProperties.density = this.value/100;}
-    	document.getElementById('friction-input').onchange = function(){fixtureProperties.friction = this.value/100;}
-	document.getElementById('restitution-input').onchange = function(){fixtureProperties.restitution = this.value/100;}*/
+	document.getElementById('density-input').onchange = function(){fixtureProperties.density = this.value/100;}
+	document.getElementById('friction-input').onchange = function(){fixtureProperties.friction = this.value/100;}
+	document.getElementById('restitution-input').onchange = function(){fixtureProperties.restitution = this.value/100;}
 	
 	document.getElementById('clear-button').addEventListener('click', function(){
-		for(var i=0, len = balls.length; i<len; i++){
-			world.DestroyBody(balls[i]);
-			balls[i] = null;
+		buoyancyController.Clear();
+		for(var i=0, len = bodies.length; i<len; i++){
+			world.DestroyBody(bodies[i]);
+			bodies[i] = null;
 		}
-		balls = [];
+		
+		bodies = [];
 	}, false);
 	
 	/* set up the box2D world than will do
@@ -61,6 +63,7 @@ function init(){
 	
 	createFloor();
 	createPool();
+	listenForContact();
 	setupDebugDraw();
 	
 	update();
@@ -100,7 +103,7 @@ function createPool(){
 	// Set up the buoyancy controller
 	buoyancyController = new b2BuoyancyController();
 	buoyancyController.normal.Set(0, -1);
-	buoyancyController.offset = -200/scale;
+	buoyancyController.offset = -230/scale;
 	buoyancyController.useDensity = true;
 	buoyancyController.density = 2.0;
 	buoyancyController.linearDrag = 5;
@@ -167,27 +170,56 @@ function update(){
 	world.ClearForces();
 	
 	world.DrawDebugData();
-	//writeFixtureInfo();
+	writeFixtureInfo();
 	requestAnimationFrame(update, canvas);
 }
 
 /* Fixture properties info text */
-/*function writeFixtureInfo(){
+function writeFixtureInfo(){
 	ctx.font = '12pt Helvetica';
 	ctx.fillStyle = 'white';
-	ctx.fillText("Fixture info", 10, 25);
+	ctx.fillText("Properties Info", 10, 25);
 	ctx.font = '10pt Helvetica';
 	ctx.fillText("density: " + fixtureProperties.density, 10, 50);
 	ctx.fillText("friction: " + fixtureProperties.friction, 10, 70);
 	ctx.fillText("restitution: " + fixtureProperties.restitution, 10, 90);
-}*/
+	ctx.fillText("buoyancy density: 2.0", 10, 110);
+}
 
 /* Create a new box body with a random width
 and height between 10 and 60 in the mouse coords*/
 function createNewBody(e){
 	var mouseCoords = relMouseCoords(e);
 	var body = createBoxBody(mouseCoords.x, mouseCoords.y, Math.random() * 50 + 10, Math.random() * 50 + 10, b2Body.b2_dynamicBody, false);
-	balls.push(body);
+	bodies.push(body);
+}
+
+function listenForContact(){
+	var listener = new Box2D.Dynamics.b2ContactListener;
+	listener.BeginContact = function(contact){
+		var fixtureA = contact.GetFixtureA();
+		var fixtureB = contact.GetFixtureB();
+		if(fixtureA.IsSensor()){
+			var bodyB = fixtureB.GetBody();
+			if(!bodyB.GetControllerList()) buoyancyController.AddBody(bodyB);
+		}else if(fixtureB.IsSensor()){
+			var bodyA = fixtureA.GetBody();
+			if(!bodyA.GetControllerList()) buoyancyController.AddBody(bodyA);
+		}
+	}
+	listener.EndContact = function(contact){
+		var fixtureA = contact.GetFixtureA();
+		var fixtureB = contact.GetFixtureB();
+		if(fixtureA.IsSensor()){
+			var bodyB = fixtureB.GetBody();
+			console.log(bodyB);
+			if(bodyB.GetControllerList()) buoyancyController.RemoveBody(bodyB);
+		}else if(fixtureB.IsSensor()){
+			var bodyA = fixtureA.GetBody();
+			if(bodyA.GetControllerList()) buoyancyController.RemoveBody(bodyA);
+		}
+	}
+	world.SetContactListener(listener);
 }
 
 /* Get mouse coords */
