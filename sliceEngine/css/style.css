@@ -1,0 +1,40 @@
+*{ font-family: helvetica, arial;}
+html{background-color: #eeeeee;}
+html,body{ margin:0; padding:0; width: 100%;}
+
+.canvas-container{ width: 800px; display:block; margin:20px auto; text-align: center; position:relative;}
+	#id-canvas{ background-color: #333333; vertical-align: bottom; cursor:default;}
+
+	.control-container{
+		padding-top: 14px;
+		width: 100%;
+		overflow: hidden;
+		padding-bottom: 20px;
+		border-top: none;
+		background-color: #1d1e1f;
+		position: relative;
+		color: #b4b4b4;
+	}
+	
+	.reset-button{
+		background-color: #1d1e1f;
+		color: #b4b4b4;
+		font-size: 14pt;
+		font-variant: normal;
+		line-height: 40px;
+		border-radius: 0 0 0px 15px;
+		cursor: pointer;
+		margin: 0;
+		box-shadow: 0px 1px 8px rgba(0,0,0,0.5);
+		border: none;
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 90px;
+		border-left: 2px solid #333333;
+		border-top: none;
+		border-right: none;
+		border-bottom: 2px solid #333333;
+	}
+		
+	.reset-button:active{ background-color: #111111;}
